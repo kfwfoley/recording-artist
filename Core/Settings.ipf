@@ -919,13 +919,13 @@ function /s StrPackageSetting(module,package,instance,object[,setting,default_,s
 				variable i
 				for(i=0;i<itemsinlist(funcs,"+");i+=1)
 					string func = stringfromlist(i,funcs,"+")
-					string cmd="string /g temp=ProcGlobal#"+func
+					string cmd="string /g temp123789=ProcGlobal#"+func
 					Execute /Q/Z cmd
 					if(v_flag)
 						func = replacestring("\"",func,"")
 						str += removeending(func,";")+";"
 					else
-						svar /z temp
+						svar /z temp = temp123789
 						if(svar_exists(temp) && strlen(temp))
 							str += removeending(temp,";")+";"
 							killstrings /z temp

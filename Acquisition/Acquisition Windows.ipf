@@ -2916,6 +2916,11 @@ Function AnalysisMethodSubSelections(axisNum)
 			descriptionLong="Half-width for peak-averaging (ms)"
 			value=0.1
 			break
+		case "PeakT":
+			labell="Peak Time"
+			titles="Pulse 1;Pulse 2"
+			PopupMenu Minimum, disable=0
+			break
 		case "Charge":
 			titles="Pulse 1;Pulse 2"
 			PopupMenu Minimum, disable=0
@@ -3080,6 +3085,8 @@ Function AnalysisMethodSubSelections(axisNum)
 		endif
 		SetVariable Parameter, disable=0, limits={lim[0],lim[1],lim[2]}, bodywidth=40, value=_NUM:(value), help={descriptionLong}, proc=AnalysisWinSetVariables, win=AnalysisWin,title=descriptionShort+":"
 	endif
+	
+	ModifyGraph grid($axisName)=2
 End
 
 Function AnalysisWinCheckboxes(ctrlName,val) : CheckboxControl

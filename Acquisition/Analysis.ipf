@@ -927,6 +927,23 @@ Function MakeMeasurement(measurement,method,Sweep,Result,sweepNum,chan,layer,bas
  				result[sweepNum][i][layer] = (IPI || i==0) ? (flip_sign ? baseline-V_min : v_max-baseline) : 0
  			endfor
  			break
+ 		case "PeakT": // The maximum/minimum value between the cursors (normalized to baseline).  
+ 			redimension /n=(-1,max(dimsize(result,1),numPulses_),-1) result
+ 			wave begin = GetChanStimParam("Begin",chan,sweepNum=sweepNum)
+ 			for(i=0;i<numPulses_;i+=1)
+ 				waveStats /Q/M=1 /R=(baselineLeft+i*IPI,baselineRight+i*IPI) Sweep
+ 				wavestats/M=1/Q/R=(x_left+i*IPI,x_right+i*IPI) Sweep
+ 				//print flip_sign,v_min,v_max
+ 				print i, v_minloc, v_maxloc, flip_sign
+ 				variable raw = (IPI || i==0) ? (flip_sign ? v_minloc : v_maxloc) : 0
+ 				variable pulse_t = begin[0]/1000
+ 				print raw, pulse_t
+ 				result[sweepNum][i][layer] = (raw - pulse_t) * 1000 
+ 			endfor
+ 			for(i=numPulses_;i<dimsize(result,1);i+=1)
+ 				result[sweepNum][i][layer] = Nan
+ 			endfor
+ 			break
  		case "PeakWX": // The maximum/minimum value between the cursors (normalized to baseline).  
  			variable width=param[0]
  			width=(numtype(width) || width==0) ? 0.0001 : width/1000 // Convert from ms to seconds.  
@@ -961,6 +978,11 @@ Function MakeMeasurement(measurement,method,Sweep,Result,sweepNum,chan,layer,bas
  			Wavestats/M=1/Q slope_piece2
  			result[sweepNum][1][layer] =  IPI ? abs(SelectNumber(flip_sign,V_max,V_min))/1000 : 0
  			KillWaves /Z slope_piece1,slope_piece2
+ 			break
+ 		case "Slope_Raw": // Slope between the cursors (no max/min calculation)
+ 			waveStats /Q/M=1 /R=(x_left,x_right) Sweep
+ 			result[sweepNum][0][layer] = (V_min-V_max)/(x_right-x_left)
+ 			result[sweepNum][1][layer] = NaN
  			break
  		case "Ratio": // The ratio of the second to the first pulse.  
  			WaveStats /Q/M=1 /R=(baselineLeft,baselineRight) Sweep
