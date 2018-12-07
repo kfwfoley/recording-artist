@@ -6,7 +6,7 @@
 #pragma rtGlobals=1		// Use modern global access method.
 static strconstant module=Acq
 
-Menu "Analysis", dynamic 
+Menu "Analysis", dynamic
 	"----------------------"
 	"Quick Stats", WaveStat()
 	"Cut", Cut()
