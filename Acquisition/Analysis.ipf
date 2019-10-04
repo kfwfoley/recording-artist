@@ -915,15 +915,16 @@ Function MakeMeasurement(measurement,method,Sweep,Result,sweepNum,chan,layer,bas
 	wave /T Labels=GetChanLabels()
 	string mode=SweepAcqMode(chan,sweepNum)
 	wave param=GetAnalysisParameter(measurement,chan)
+	IPI/=1000
 	strswitch(method)
- 		case "Peak": // The maximum/minimum value between the cursors (normalized to baseline).  
+		case "Peak": // The maximum/minimum value between the cursors (normalized to baseline).  
  			redimension /n=(-1,max(dimsize(result,1),numPulses_),-1) result
  			variable i
  			for(i=0;i<numPulses_;i+=1)
  				waveStats /Q/M=1 /R=(baselineLeft+i*IPI,baselineRight+i*IPI) Sweep
  				variable baseline=v_avg
  				wavestats/M=1/Q/R=(x_left+i*IPI,x_right+i*IPI) Sweep
- 				//print flip_sign,v_min,v_max
+ 				print sweepNum, i, layer, IPI, flip_sign, baseline, v_min,v_max
  				result[sweepNum][i][layer] = (IPI || i==0) ? (flip_sign ? baseline-V_min : v_max-baseline) : 0
  			endfor
  			break
@@ -934,7 +935,7 @@ Function MakeMeasurement(measurement,method,Sweep,Result,sweepNum,chan,layer,bas
  				waveStats /Q/M=1 /R=(baselineLeft+i*IPI,baselineRight+i*IPI) Sweep
  				wavestats/M=1/Q/R=(x_left+i*IPI,x_right+i*IPI) Sweep
  				//print flip_sign,v_min,v_max
- 				print i, v_minloc, v_maxloc, flip_sign
+ 				//print i, v_minloc, v_maxloc, flip_sign
  				variable raw = (IPI || i==0) ? (flip_sign ? v_minloc : v_maxloc) : 0
  				variable pulse_t = begin[0]/1000
  				print raw, pulse_t
@@ -969,7 +970,7 @@ Function MakeMeasurement(measurement,method,Sweep,Result,sweepNum,chan,layer,bas
 			 endif
 			 break
     case "Slope": // Maximum/Minimum slope within the region between the cursors.
-			Duplicate /O/R=(x_left,x_right) Sweep slope_piece1
+ 			Duplicate /O/R=(x_left,x_right) Sweep slope_piece1
 			Duplicate /O/R=(x_left+IPI,x_right+IPI) Sweep slope_piece2
  			Smooth 2,slope_piece1,slope_piece2
  			Differentiate slope_piece1,slope_piece2
@@ -1241,6 +1242,7 @@ Function MakeMeasurement(measurement,method,Sweep,Result,sweepNum,chan,layer,bas
 		 	width=param[0]
 		 	variable delay=param[1]
  			width=(numtype(width) || width==0) ? 0.0001 : width/1000 // Convert from ms to seconds.  
+ 			delay=(numtype(delay) || delay==0) ? 0.0001 : delay/1000 // Convert from ms to seconds.
  			WaveStats /Q/M=1 /R=(baselineLeft,baselineRight) Sweep
  			baseline=V_avg
  			result[sweepNum][0][layer] = baseline - mean(Sweep,x_left-width,x_left+width)
